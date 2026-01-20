@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High Risk Users - Agile Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-4px);
+        }
+
+        .header-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .warning-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .high-risk-count {
+            font-size: 72px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .risk-label {
+            font-size: 24px;
+            color: #6b7280;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .member-card {
+            background: #fef2f2;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 6px solid #ef4444;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .member-card:hover {
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .member-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 24px;
+        }
+
+        .member-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .risk-score {
+            font-size: 48px;
+            font-weight: 700;
+            color: #ef4444;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .metric-box {
+            background: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .recommendations-box {
+            background: #fffbeb;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .recommendations-title {
+            font-weight: 600;
+            color: #d97706;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations-list li {
+            padding: 8px 0;
+            color: #92400e;
+            font-size: 14px;
+            display: flex;
+            align-items: start;
+            gap: 8px;
+        }
+
+        .recommendations-list li:before {
+            content: "→";
+            color: #f59e0b;
+            font-weight: bold;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .loading-spinner {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #6b7280;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="goBack()">
+            ← Back to Dashboard
+        </button>
+
+        <div id="loadingState" class="loading">
+            <div class="loading-spinner">⏳</div>
+            <p>Loading high risk users...</p>
+        </div>
+
+        <div id="contentState" style="display: none;">
+            <div class="header-card">
+                <div class="warning-icon">⚠️</div>
+                <div class="high-risk-count" id="highRiskCount">--</div>
+                <div class="risk-label">High Risk Users</div>
+                <p style="color: #6b7280; font-size: 18px; margin-top: 16px;">
+                    Team members requiring immediate attention
+                </p>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">👥 High Risk Team Members</h3>
+                <div id="highRiskList"></div>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">📊 Risk Analysis Summary</h3>
+                <div id="riskSummary"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        window.onload = async function() {
+            // Clear any stray OAuth state
+            sessionStorage.removeItem('oauth_state');
+            localStorage.removeItem('oauth_state');
+
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            if (!user.username) {
+                window.location.href = '/';
+                return;
+            }
+
+            await loadHighRiskUsers();
+        };
+
+        function goBack() {
+            window.location.href = '/manager-dashboard';
+        }
+
+        async function loadHighRiskUsers() {
+            try {
+                console.log('⚠️ Loading high risk users...');
+
+                const response = await fetch(`${API_BASE}/test-sprint-model-real`);
+                const data = await response.json();
+
+                console.log('Risk data:', data);
+
+                if (data.status === 'success' && data.test_predictions?.predictions) {
+                    const allPredictions = data.test_predictions.predictions;
+                    
+                    // Filter high risk users (>70%)
+                    const highRiskUsers = allPredictions.filter(p => p.predicted_risk_score > 70);
+                    
+                    document.getElementById('highRiskCount').textContent = highRiskUsers.length;
+
+                    if (highRiskUsers.length > 0) {
+                        renderHighRiskUsers(highRiskUsers);
+                        renderRiskSummary(highRiskUsers);
+                    } else {
+                        document.getElementById('highRiskList').innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">✅</div>
+                                <p style="font-size: 20px; font-weight: 600; color: #10b981; margin-bottom: 8px;">
+                                    Great News!
+                                </p>
+                                <p>No team members are at high risk. Keep up the good work!</p>
+                            </div>
+                        `;
+                    }
+
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('contentState').style.display = 'block';
+                } else {
+                    throw new Error('No risk data available');
+                }
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="loading-spinner">❌</div>
+                    <p>Error: ${error.message}</p>
+                    <button class="back-button" onclick="goBack()" style="margin-top: 20px;">
+                        Back to Dashboard
+                    </button>
+                `;
+            }
+        }
+
+        function renderHighRiskUsers(users) {
+            const html = users.map(user => {
+                const initial = user.user_id.charAt(0).toUpperCase();
+                const displayName = user.user_id.split('_').map(w => 
+                    w.charAt(0).toUpperCase() + w.slice(1)
+                ).join(' ');
+
+                return `
+                    <div class="member-card" onclick="showUserDetails('${user.user_id}')">
+                        <div class="member-header">
+                            <div class="member-info">
+                                <div class="member-avatar">${initial}</div>
+                                <div>
+                                    <div class="member-name">${displayName}</div>
+                                    <div style="color: #dc2626; font-size: 14px; font-weight: 600;">
+                                        ${user.risk_level} Risk
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="risk-score">${Math.round(user.predicted_risk_score)}%</div>
+                        </div>
+
+                        <div class="metrics-grid">
+                            <div class="metric-box">
+                                <div class="metric-label">Meeting Hours</div>
+                                <div class="metric-value" style="color: ${user.meeting_hours > 5 ? '#ef4444' : '#6b7280'};">
+                                    ${user.meeting_hours || 0}h
+                                </div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-label">Focus Time</div>
+                                <div class="metric-value" style="color: ${user.focus_hours < 2 ? '#ef4444' : '#6b7280'};">
+                                    ${user.focus_hours || 0}h
+                                </div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-label">Commits</div>
+                                <div class="metric-value" style="color: ${user.total_commits < 5 ? '#ef4444' : '#6b7280'};">
+                                    ${user.total_commits || 0}
+                                </div>
+                            </div>
+                            <div class="metric-box">
+                                <div class="metric-label">Messages</div>
+                                <div class="metric-value">${user.total_messages || 0}</div>
+                            </div>
+                        </div>
+
+                        <div class="recommendations-box">
+                            <div class="recommendations-title">💡 Recommended Actions</div>
+                            <ul class="recommendations-list">
+                                ${user.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('highRiskList').innerHTML = html;
+        }
+
+        function renderRiskSummary(users) {
+            const avgRisk = users.reduce((sum, u) => sum + u.predicted_risk_score, 0) / users.length;
+            const avgMeetings = users.reduce((sum, u) => sum + (u.meeting_hours || 0), 0) / users.length;
+            const avgFocus = users.reduce((sum, u) => sum + (u.focus_hours || 0), 0) / users.length;
+            const avgCommits = users.reduce((sum, u) => sum + (u.total_commits || 0), 0) / users.length;
+
+            document.getElementById('riskSummary').innerHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-label">Average Risk</div>
+                        <div class="metric-value" style="color: #ef4444;">${Math.round(avgRisk)}%</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Avg Meeting Hours</div>
+                        <div class="metric-value">${avgMeetings.toFixed(1)}h</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Avg Focus Time</div>
+                        <div class="metric-value">${avgFocus.toFixed(1)}h</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-label">Avg Commits</div>
+                        <div class="metric-value">${Math.round(avgCommits)}</div>
+                    </div>
+                </div>
+
+                <div style="background: #fef2f2; padding: 20px; border-radius: 12px; margin-top: 20px; border-left: 4px solid #ef4444;">
+                    <h4 style="color: #dc2626; margin-bottom: 12px;">🚨 Immediate Actions Required</h4>
+                    <ul style="margin: 0; padding-left: 20px; color: #991b1b;">
+                        <li style="margin-bottom: 8px;">Schedule 1-on-1 meetings within 24-48 hours</li>
+                        <li style="margin-bottom: 8px;">Reduce meeting load to under 4 hours/day</li>
+                        <li style="margin-bottom: 8px;">Block dedicated focus time (2-3 hour blocks)</li>
+                        <li style="margin-bottom: 8px;">Identify and remove blockers immediately</li>
+                        <li style="margin-bottom: 8px;">Consider workload redistribution</li>
+                    </ul>
+                </div>
+            `;
+        }
+
+        function showUserDetails(userId) {
+            // Store user and redirect to individual view
+            sessionStorage.setItem('selectedMember', userId);
+            window.location.href = '/manager-dashboard';
+        }
+    </script>
+</body>
+</html>

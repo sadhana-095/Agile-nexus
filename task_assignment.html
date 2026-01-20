@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign Task - Agile Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-4px);
+        }
+
+        .header-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .task-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .page-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-subtitle {
+            font-size: 18px;
+            color: #6b7280;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid #3b82f6;
+            margin-bottom: 16px;
+        }
+
+        .info-title {
+            font-weight: 600;
+            color: #1e40af;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-text {
+            color: #1e40af;
+            font-size: 13px;
+        }
+
+        .member-recommendation {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .member-recommendation:hover {
+            border-color: #10b981;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .member-recommendation.selected {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .member-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .rank-badge {
+            font-size: 24px;
+        }
+
+        .member-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .score-display {
+            text-align: right;
+        }
+
+        .score-value {
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .metric-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 10px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .reasons-box {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 3px solid #10b981;
+        }
+
+        .reasons-list {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .loading-spinner {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .selected-indicator {
+            display: none;
+            background: #10b981;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .member-recommendation.selected .selected-indicator {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="goBack()">
+            ← Back to Dashboard
+        </button>
+
+        <div id="loadingState" class="loading">
+            <div class="loading-spinner">⏳</div>
+            <p>Loading AI recommendations...</p>
+        </div>
+
+        <div id="contentState" style="display: none;">
+            <div class="header-card">
+                <div class="task-icon">📋</div>
+                <div class="page-title">Assign Task</div>
+                <p class="page-subtitle" id="projectName">Loading project...</p>
+            </div>
+
+            <form onsubmit="submitTask(event)" id="taskForm">
+                <div class="card">
+                    <h3 class="card-title">📝 Task Details</h3>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Task Title *</label>
+                        <input type="text" class="form-input" id="taskTitle" required 
+                               placeholder="e.g., Implement user authentication">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-textarea" id="taskDescription" 
+                                  placeholder="Describe the task requirements, acceptance criteria, and any important details..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Priority *</label>
+                        <select class="form-select" id="taskPriority" required>
+                            <option value="low">🟢 Low Priority</option>
+                            <option value="medium" selected>🟡 Medium Priority</option>
+                            <option value="high">🔴 High Priority</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Due Date</label>
+                        <input type="date" class="form-input" id="taskDueDate">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title">🤖 AI-Recommended Team Members</h3>
+                    
+                    <div class="info-box">
+                        <div class="info-title">💡 How Recommendations Work</div>
+                        <div class="info-text">
+                            Our AI analyzes current workload, risk scores, productivity, and dependencies 
+                            to recommend the best team member for this task. Click to select.
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="selectedMember" required>
+
+                    <div id="recommendationsList"></div>
+                </div>
+
+                <div class="card">
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        <span>✅</span>
+                        <span>Assign Task & Send Notification</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let currentProject = null;
+        let recommendations = [];
+
+        window.onload = async function() {
+            sessionStorage.removeItem('oauth_state');
+            localStorage.removeItem('oauth_state');
+
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            if (!user.username || user.role !== 'manager') {
+                window.location.href = '/';
+                return;
+            }
+
+            await loadTaskAssignment();
+        };
+
+        function goBack() {
+            window.location.href = '/manager-dashboard';
+        }
+
+        async function loadTaskAssignment() {
+            try {
+                console.log('📋 Loading task assignment...');
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id') || 
+                                 JSON.parse(sessionStorage.getItem('currentProject') || '{}').id;
+                
+                if (!projectId) {
+                    throw new Error('No project selected');
+                }
+
+                currentProject = { id: projectId };
+
+                // Get project info
+                const user = JSON.parse(sessionStorage.getItem('user'));
+                const projectResponse = await fetch(`${API_BASE}/api/projects?username=${user.username}`);
+                const projectData = await projectResponse.json();
+                
+                if (projectData.status === 'success') {
+                    const project = projectData.projects.find(p => p.id == projectId);
+                    if (project) {
+                        currentProject = project;
+                        document.getElementById('projectName').textContent = project.name;
+                    }
+                }
+
+                // Get team members
+                const membersResponse = await fetch(`${API_BASE}/api/projects/${projectId}/members`);
+                const membersData = await membersResponse.json();
+
+                if (membersData.status === 'success') {
+                    const members = membersData.members.filter(m => m.role !== 'manager');
+                    
+                    // Calculate recommendations
+                    recommendations = await calculateRecommendations(members);
+                    renderRecommendations(recommendations);
+
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('contentState').style.display = 'block';
+                } else {
+                    throw new Error('Failed to load team members');
+                }
+
+            } catch (error) {
+                console.error('❌ Error:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="loading-spinner">❌</div>
+                    <p>Error: ${error.message}</p>
+                    <button class="back-button" onclick="goBack()" style="margin-top: 20px;">
+                        Back to Dashboard
+                    </button>
+                `;
+            }
+        }
+
+        async function calculateRecommendations(members) {
+            const recommendations = [];
+
+            for (const member of members) {
+                let score = 100;
+                let reasons = [];
+                let riskScore = 0;
+                let productivity = 70;
+                let taskLoad = 0;
+                let dependencyCount = 0;
+
+                try {
+                    // Get sprint risk
+                    const sprintResponse = await fetch(`${API_BASE}/test-sprint-model-real`);
+                    const sprintData = await sprintResponse.json();
+                    
+                    if (sprintData.status === 'success') {
+                        const memberData = sprintData.test_predictions.predictions.find(p => 
+                            p.user_id.toLowerCase().includes(member.username.toLowerCase())
+                        );
+                        if (memberData) {
+                            riskScore = memberData.predicted_risk_score || 0;
+                        }
+                    }
+
+                    // Get tasks
+                    const taskResponse = await fetch(`${API_BASE}/api/tasks/${member.username}`);
+                    const taskData = await taskResponse.json();
+                    
+                    if (taskData.status === 'success') {
+                        const stats = taskData.statistics;
+                        taskLoad = stats.pending + stats.in_progress;
+                        
+                        if (stats.total > 0) {
+                            const completionRate = stats.completion_rate || 0;
+                            const activityFactor = Math.min(100, (stats.in_progress + stats.completed) * 20);
+                            productivity = Math.round((completionRate * 0.7) + (activityFactor * 0.3));
+                        }
+                    }
+
+                    // Calculate score
+                    if (riskScore > 70) {
+                        score -= 35;
+                        reasons.push('⚠️ High risk score - may need support');
+                    } else if (riskScore > 50) {
+                        score -= 20;
+                        reasons.push('⚡ Moderate risk - monitor closely');
+                    } else if (riskScore < 30) {
+                        reasons.push('✅ Low risk - stable performer');
+                    }
+
+                    if (productivity > 80) {
+                        score += 5;
+                        reasons.push(`🎯 High productivity (${productivity}%)`);
+                    } else if (productivity < 50) {
+                        score -= 30;
+                        reasons.push('📉 Low productivity - may struggle');
+                    }
+
+                    if (taskLoad === 0) {
+                        score += 10;
+                        reasons.push('🆓 Available - no pending tasks');
+                    } else if (taskLoad <= 2) {
+                        reasons.push(`✓ Light workload (${taskLoad} tasks)`);
+                    } else if (taskLoad > 5) {
+                        score -= 25;
+                        reasons.push(`📚 Heavy workload (${taskLoad} tasks)`);
+                    } else {
+                        score -= 10;
+                        reasons.push(`📋 Moderate workload (${taskLoad} tasks)`);
+                    }
+
+                    recommendations.push({
+                        username: member.username,
+                        full_name: member.full_name,
+                        score: Math.max(0, Math.min(100, score)),
+                        riskScore: riskScore,
+                        productivity: productivity,
+                        taskLoad: taskLoad,
+                        dependencyCount: dependencyCount,
+                        reasons: reasons,
+                        status: score >= 80 ? 'excellent' : score >= 60 ? 'good' : score >= 40 ? 'fair' : 'poor'
+                    });
+
+                } catch (error) {
+                    console.error(`Error analyzing ${member.username}:`, error);
+                }
+            }
+
+            recommendations.sort((a, b) => b.score - a.score);
+            return recommendations;
+        }
+
+        function renderRecommendations(recommendations) {
+            const html = recommendations.map((rec, index) => {
+                const statusColor = rec.status === 'excellent' ? '#10b981' :
+                                    rec.status === 'good' ? '#3b82f6' :
+                                    rec.status === 'fair' ? '#f59e0b' : '#ef4444';
+                
+                const rankBadge = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+
+                return `
+                    <div class="member-recommendation" onclick="selectMember('${rec.username}', '${rec.full_name}')">
+                        <div class="member-header">
+                            <div class="member-info">
+                                <div class="rank-badge">${rankBadge}</div>
+                                <div>
+                                    <div class="member-name">${rec.full_name}</div>
+                                    <div style="font-size: 13px; color: #6b7280;">@${rec.username}</div>
+                                </div>
+                            </div>
+                            <div class="score-display">
+                                <div class="score-value" style="color: ${statusColor};">${rec.score}</div>
+                                <div class="score-label">${rec.status}</div>
+                            </div>
+                        </div>
+
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-label">Risk</div>
+                                <div class="metric-value" style="color: ${rec.riskScore > 70 ? '#ef4444' : rec.riskScore > 50 ? '#f59e0b' : '#10b981'};">
+                                    ${rec.riskScore}%
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Productivity</div>
+                                <div class="metric-value">${rec.productivity}%</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Tasks</div>
+                                <div class="metric-value">${rec.taskLoad}</div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-label">Deps</div>
+                                <div class="metric-value">${rec.dependencyCount}</div>
+                            </div>
+                        </div>
+
+                        <div class="reasons-box">
+                            <div class="reasons-list">
+                                ${rec.reasons.map(r => `<div style="margin-bottom: 4px;">• ${r}</div>`).join('')}
+                            </div>
+                        </div>
+
+                        <div class="selected-indicator">
+                            ✅ Selected for task assignment
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('recommendationsList').innerHTML = html;
+        }
+
+        function selectMember(username, fullName) {
+            // Remove previous selection
+            document.querySelectorAll('.member-recommendation').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            // Mark as selected
+            event.currentTarget.classList.add('selected');
+            document.getElementById('selectedMember').value = username;
+
+            console.log(`✅ Selected: ${fullName} (@${username})`);
+        }
+
+        async function submitTask(event) {
+            event.preventDefault();
+
+            const selectedMember = document.getElementById('selectedMember').value;
+            
+            if (!selectedMember) {
+                alert('Please select a team member from the recommendations above');
+                return;
+            }
+
+            const user = JSON.parse(sessionStorage.getItem('user'));
+            
+            const taskData = {
+                project_id: currentProject.id,
+                title: document.getElementById('taskTitle').value,
+                description: document.getElementById('taskDescription').value,
+                assigned_to: selectedMember,
+                assigned_by: user.username,
+                priority: document.getElementById('taskPriority').value,
+                due_date: document.getElementById('taskDueDate').value || null
+            };
+
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span>⏳</span><span>Assigning task...</span>';
+
+            try {
+                const response = await fetch(`${API_BASE}/api/tasks`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData)
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    alert('✅ Task assigned successfully! Email notification sent to team member.');
+                    window.location.href = '/manager-dashboard';
+                } else {
+                    throw new Error(data.error || 'Failed to assign task');
+                }
+
+            } catch (error) {
+                alert('❌ Error: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>✅</span><span>Assign Task & Send Notification</span>';
+            }
+        }
+    </script>
+</body>
+</html>

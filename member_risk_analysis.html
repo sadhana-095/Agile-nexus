@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Risk Analysis - Agile Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .brand-text h1 {
+            font-size: 20px;
+            color: #1f2937;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .back-btn {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background: #5568d3;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #6b7280;
+        }
+
+        .alert {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+
+        .alert-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            color: #1e40af;
+            margin-bottom: 4px;
+        }
+
+        .alert-text {
+            color: #1e40af;
+        }
+
+        .hero-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 32px;
+            border-radius: 16px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .hero-card.risk-low {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .hero-card.risk-medium {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .hero-card.risk-high {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .hero-card.risk-critical {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .hero-card.productivity-low {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .hero-card.productivity-medium {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .hero-card.productivity-high {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .hero-label {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .hero-value {
+            font-size: 64px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .hero-subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+            color: #1f2937;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f3f4f6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .metric-card {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .metric-card.warning {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+        }
+
+        .metric-card.success {
+            background: #f0fdf4;
+            border-left-color: #10b981;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .metric-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .metric-value.warning {
+            color: #ef4444;
+        }
+
+        .metric-value.success {
+            color: #10b981;
+        }
+
+        .metric-subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .formula-box {
+            background: #1f2937;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 16px 0;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .recommendations-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommendations-list li {
+            padding: 16px;
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .recommendations-list li strong {
+            color: #d97706;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .action-plan {
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .action-plan h4 {
+            color: #1e40af;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .action-plan ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .action-plan ul li {
+            padding: 10px 0;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .info-value {
+            color: #1f2937;
+            font-weight: 700;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f4f6;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .hero-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-value {
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo">🚀</div>
+            <div class="brand-text">
+                <h1>Agile Nexus</h1>
+                <p>Member Risk Analysis</p>
+            </div>
+        </div>
+        <a href="/manager-dashboard" class="back-btn">
+            ← Back to Dashboard
+        </a>
+    </nav>
+
+    <div class="container">
+        <div id="loadingState" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading member analysis...</p>
+        </div>
+
+        <div id="contentArea" style="display: none;">
+            <div class="page-header">
+                <h1 id="memberName">Loading...</h1>
+                <p>Comprehensive risk analysis and performance metrics</p>
+            </div>
+
+            <div class="alert">
+                <div class="alert-title">
+                    👁️ View-Only Access
+                </div>
+                <div class="alert-text">
+                    You have read-only access. Contact your manager for model training or system changes.
+                </div>
+            </div>
+
+            <!-- Hero Cards -->
+            <div class="hero-cards">
+                <div class="hero-card" id="riskCard">
+                    <div class="hero-label">Your Risk Score</div>
+                    <div class="hero-value" id="riskScore">--</div>
+                    <div class="hero-subtitle" id="riskSubtitle">Loading...</div>
+                </div>
+
+                <div class="hero-card" id="productivityCard">
+                    <div class="hero-label">Your Productivity</div>
+                    <div class="hero-value" id="productivityScore">--</div>
+                    <div class="hero-subtitle">Average productivity this week</div>
+                </div>
+            </div>
+
+            <!-- Current Metrics -->
+            <div class="section">
+                <h2>📊 Current Metrics</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card" id="meetingCard">
+                        <div class="metric-label">Meeting Hours/Day</div>
+                        <div class="metric-value" id="meetingHours">--</div>
+                        <div class="metric-subtitle" id="meetingStatus">This week</div>
+                    </div>
+                    <div class="metric-card" id="focusCard">
+                        <div class="metric-label">Focus Time/Day</div>
+                        <div class="metric-value" id="focusHours">--</div>
+                        <div class="metric-subtitle" id="focusStatus">This week</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-label">Code Commits</div>
+                        <div class="metric-value" id="totalCommits">--</div>
+                        <div class="metric-subtitle">This week</div>
+                    </div>
+                    <div class="metric-card" id="tasksCard">
+                        <div class="metric-label">Tasks Completed</div>
+                        <div class="metric-value" id="tasksCompleted">--</div>
+                        <div class="metric-subtitle">This sprint</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Performance -->
+            <div class="section" id="taskPerformanceSection">
+                <h2>📋 Task Performance</h2>
+                <div class="metrics-grid" id="taskMetrics"></div>
+            </div>
+
+            <!-- How Risk is Calculated -->
+            <div class="section">
+                <h2>📊 How This Risk Score is Calculated</h2>
+                <p style="color: #6b7280; margin-bottom: 16px;">
+                    The individual risk score uses machine learning to analyze multiple data sources:
+                </p>
+                <div class="formula-box">Individual Risk = Weighted Factors:
+
+1. Meeting Load (30%)
+   - Hours in meetings per day
+   - Context switching frequency
+   - Meeting density patterns
+
+2. Focus Time (25%)
+   - Available uninterrupted blocks
+   - Deep work hours per day
+   - Calendar fragmentation
+
+3. Code Activity (20%)
+   - Commit frequency and size
+   - Code review participation
+   - GitHub activity patterns
+
+4. Communication (15%)
+   - Slack message volume
+   - Response patterns
+   - Team collaboration frequency
+
+5. Calendar Density (10%)
+   - Back-to-back meetings
+   - Break time availability
+   - Work-life balance indicators</div>
+            </div>
+
+            <!-- AI Recommendations -->
+            <div class="section">
+                <h2>💡 AI-Generated Recommendations</h2>
+                <ul class="recommendations-list" id="recommendationsList">
+                    <li>Loading recommendations...</li>
+                </ul>
+            </div>
+
+            <!-- Manager Action Plan -->
+            <div class="section">
+                <h2>🎯 Manager Action Plan</h2>
+                <div class="action-plan" id="actionPlan">
+                    <p>Loading action plan...</p>
+                </div>
+            </div>
+
+            <!-- AI Model Details -->
+            <div class="section">
+                <h2>🤖 AI Model Details</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Algorithm</span>
+                        <span class="info-value">Random Forest + XGBoost</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Data Sources</span>
+                        <span class="info-value">Calendar, Slack, GitHub</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Training Accuracy</span>
+                        <span class="info-value" style="color: #10b981;">92-94%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Last Updated</span>
+                        <span class="info-value" id="lastUpdated">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        window.onload = async function() {
+            try {
+                // Get member data from sessionStorage
+                const memberData = JSON.parse(sessionStorage.getItem('selectedMember'));
+                
+                if (!memberData) {
+                    alert('No member data found. Redirecting to dashboard...');
+                    window.location.href = '/manager-dashboard';
+                    return;
+                }
+
+                const username = memberData.user_id;
+
+                // Display member name
+                const displayName = username
+                    .split('_')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(' ');
+
+                document.getElementById('memberName').textContent = displayName;
+
+                // ✅ FETCH REAL DATA FROM API (same as member dashboard)
+                const sprintResponse = await fetch(`${API_BASE}/test-sprint-model-real`);
+                const sprintData = await sprintResponse.json();
+
+                let riskScore = 0;
+                let meetingHours = 0;
+                let focusHours = 0;
+                let totalCommits = 0;
+                let totalMessages = 0;
+                let recommendations = [];
+
+                if (sprintData.status === 'success' && sprintData.test_predictions?.predictions) {
+                    const member = sprintData.test_predictions.predictions.find(p => {
+                        const userId = (p.user_id || '').toLowerCase();
+                        const searchName = username.toLowerCase();
+                        return userId.includes(searchName) || searchName.includes(userId);
+                    });
+
+                    if (member) {
+                        riskScore = Math.round(member.predicted_risk_score || 0);
+                        meetingHours = member.meeting_hours || 0;
+                        focusHours = member.focus_hours || 0;
+                        totalCommits = member.total_commits || 0;
+                        totalMessages = member.total_messages || 0;
+                        recommendations = member.recommendations || [];
+                    }
+                }
+
+                // Display Risk Score
+                document.getElementById('riskScore').textContent = riskScore + '%';
+                
+                const riskCard = document.getElementById('riskCard');
+                let riskLevel = '';
+                if (riskScore > 70) {
+                    riskCard.className = 'hero-card risk-critical';
+                    riskLevel = 'Critical Risk - Monitor closely';
+                } else if (riskScore > 50) {
+                    riskCard.className = 'hero-card risk-high';
+                    riskLevel = 'High Risk - Monitor closely';
+                } else if (riskScore > 25) {
+                    riskCard.className = 'hero-card risk-medium';
+                    riskLevel = 'Medium Risk - Stay on track';
+                } else {
+                    riskCard.className = 'hero-card risk-low';
+                    riskLevel = 'Low Risk - Doing great!';
+                }
+                document.getElementById('riskSubtitle').textContent = riskLevel;
+
+                // ✅ Fetch Task Data (same as member dashboard)
+                const taskResponse = await fetch(`${API_BASE}/api/tasks/${username}`);
+                const taskData = await taskResponse.json();
+
+                let productivityScore = 0;
+                let tasksCompleted = '0/0';
+
+                if (taskData.status === 'success') {
+                    const stats = taskData.statistics;
+                    const completionRate = stats.completion_rate || 0;
+                    const totalTasks = stats.total || 0;
+
+                    if (totalTasks > 0) {
+                        const activityFactor = Math.min(100, (stats.in_progress + stats.completed) * 20);
+                        productivityScore = Math.round((completionRate * 0.7) + (activityFactor * 0.3));
+                    } else {
+                        productivityScore = 30; // Match member dashboard
+                    }
+
+                    tasksCompleted = `${stats.completed}/${stats.total}`;
+
+                    // Display Task Performance Section
+                    document.getElementById('taskMetrics').innerHTML = `
+                        <div class="metric-card success">
+                            <div class="metric-label">Completed</div>
+                            <div class="metric-value success">${stats.completed}</div>
+                            <div class="metric-subtitle">Tasks finished</div>
+                        </div>
+                        <div class="metric-card" style="background: #eff6ff; border-left-color: #3b82f6;">
+                            <div class="metric-label">In Progress</div>
+                            <div class="metric-value" style="color: #3b82f6;">${stats.in_progress}</div>
+                            <div class="metric-subtitle">Active tasks</div>
+                        </div>
+                        <div class="metric-card" style="background: #fef3c7; border-left-color: #f59e0b;">
+                            <div class="metric-label">Pending</div>
+                            <div class="metric-value" style="color: #f59e0b;">${stats.pending}</div>
+                            <div class="metric-subtitle">Not started</div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Completion Rate</div>
+                            <div class="metric-value" style="color: ${stats.completion_rate > 70 ? '#10b981' : '#ef4444'};">${stats.completion_rate}%</div>
+                            <div class="metric-subtitle">Overall progress</div>
+                        </div>
+                    `;
+                }
+
+                // Display Productivity Score
+                document.getElementById('productivityScore').textContent = productivityScore + '%';
+                
+                const productivityCard = document.getElementById('productivityCard');
+                if (productivityScore > 80) {
+                    productivityCard.className = 'hero-card productivity-high';
+                } else if (productivityScore > 60) {
+                    productivityCard.className = 'hero-card productivity-medium';
+                } else {
+                    productivityCard.className = 'hero-card productivity-low';
+                }
+
+                // Display Metrics
+                document.getElementById('meetingHours').textContent = meetingHours + 'h';
+                const meetingCard = document.getElementById('meetingCard');
+                if (meetingHours > 4) {
+                    meetingCard.classList.add('warning');
+                    document.getElementById('meetingStatus').textContent = '⚠️ High meeting load';
+                } else {
+                    meetingCard.classList.add('success');
+                    document.getElementById('meetingStatus').textContent = '✅ Healthy range';
+                }
+
+                document.getElementById('focusHours').textContent = focusHours + 'h';
+                const focusCard = document.getElementById('focusCard');
+                if (focusHours < 3) {
+                    focusCard.classList.add('warning');
+                    document.getElementById('focusStatus').textContent = '⚠️ Need more focus time';
+                } else {
+                    focusCard.classList.add('success');
+                    document.getElementById('focusStatus').textContent = '✅ Good focus blocks';
+                }
+
+                document.getElementById('totalCommits').textContent = totalCommits;
+                document.getElementById('tasksCompleted').textContent = tasksCompleted;
+
+                // Display Recommendations
+                if (recommendations && recommendations.length > 0) {
+                    document.getElementById('recommendationsList').innerHTML = recommendations
+                        .map(rec => {
+                            const parts = rec.split(':');
+                            const title = parts[0];
+                            const description = parts.slice(1).join(':');
+                            return `<li><strong>${title}</strong>${description}</li>`;
+                        })
+                        .join('');
+                } else {
+                    document.getElementById('recommendationsList').innerHTML = 
+                        '<li><strong>All Good!</strong> Continue with your current work patterns.</li>';
+                }
+
+                // Display Action Plan
+                let actionPlanHTML = '';
+                if (riskScore > 70) {
+                    actionPlanHTML = `
+                        <h4>🚨 Urgent Actions:</h4>
+                        <ul>
+                            <li>📅 Schedule 1-on-1 within 24 hours</li>
+                            <li>🔄 Redistribute ${meetingHours > 4 ? 'meeting load' : 'tasks'}</li>
+                            <li>⏰ Block focus time on calendar immediately</li>
+                            <li>👥 Consider pairing with mentor</li>
+                            <li>📊 Daily progress check-ins</li>
+                        </ul>
+                    `;
+                } else if (riskScore > 50) {
+                    actionPlanHTML = `
+                        <h4>⚠️ Preventive Measures:</h4>
+                        <ul>
+                            <li>💬 Schedule 1-on-1 this week</li>
+                            <li>📋 Review workload and priorities</li>
+                            <li>🔍 Monitor progress closely</li>
+                            <li>🤝 Ensure team support available</li>
+                        </ul>
+                    `;
+                } else {
+                    actionPlanHTML = `
+                        <h4>✅ Maintenance:</h4>
+                        <ul>
+                            <li>👍 Continue current work patterns</li>
+                            <li>💪 Consider for mentoring others</li>
+                            <li>🎯 Provide growth opportunities</li>
+                        </ul>
+                    `;
+                }
+                document.getElementById('actionPlan').innerHTML = actionPlanHTML;
+
+                // Set last updated
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+
+                // Hide loading, show content
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('contentArea').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading member analysis:', error);
+                alert('Error loading data: ' + error.message);
+                window.location.href = '/manager-dashboard';
+            }
+        };
+    </script>
+</body>
+</html>

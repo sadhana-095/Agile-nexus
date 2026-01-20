@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - Agile Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .brand-text h1 {
+            font-size: 20px;
+            color: #1f2937;
+        }
+
+        .brand-text p {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #1f2937;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            color: #1f2937;
+        }
+
+        .notification-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            border-left: 4px solid #667eea;
+        }
+
+        .notification-card.unread {
+            background: #eff6ff;
+            border-left-color: #3b82f6;
+        }
+
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .notification-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .notification-message {
+            color: #6b7280;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .notification-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .notification-type {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .type-task {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .type-project {
+            background: #f3e8ff;
+            color: #6b21a8;
+        }
+
+        .type-system {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .mark-read-btn {
+            padding: 6px 12px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mark-read-btn:hover {
+            background: #059669;
+            transform: scale(1.05);
+        }
+
+        .mark-read-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .actions-bar {
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .unread-badge {
+            background: #ef4444;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <div class="logo">🚀</div>
+            <div class="brand-text">
+                <h1>Agile Nexus</h1>
+                <p>Notifications</p>
+            </div>
+        </div>
+        <div class="navbar-right">
+            <button class="btn btn-secondary" onclick="goBack()">
+                ← Back to Dashboard
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <div>
+                <h1>🔔 Notifications</h1>
+                <p style="color: #6b7280; margin-top: 8px;">Stay updated with your team activities</p>
+            </div>
+            <span class="unread-badge" id="unreadBadge" style="display: none;">0 Unread</span>
+        </div>
+
+        <div class="actions-bar">
+            <button class="btn btn-primary" onclick="markAllAsRead()">
+                ✅ Mark All as Read
+            </button>
+            <button class="btn btn-secondary" onclick="filterUnread()">
+                🔍 Show Unread Only
+            </button>
+            <button class="btn btn-secondary" onclick="showAll()">
+                📋 Show All
+            </button>
+        </div>
+
+        <div id="notificationsList">
+            <div class="loading">Loading notifications...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+        let allNotifications = [];
+        let currentFilter = 'all'; // 'all' or 'unread'
+
+        window.onload = function() {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            if (!user.username) {
+                window.location.href = '/';
+                return;
+            }
+
+            loadNotifications();
+        };
+
+        function goBack() {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            // Navigate back to appropriate dashboard
+            if (user.role === 'manager') {
+                window.location.href = '/manager-dashboard';
+            } else {
+                window.location.href = '/team-dashboard';
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const user = JSON.parse(sessionStorage.getItem('user'));
+                const response = await fetch(`${API_BASE}/api/notifications/${user.username}`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    allNotifications = data.notifications;
+                    renderNotifications(allNotifications);
+                    updateUnreadBadge(data.unread_count);
+                } else {
+                    throw new Error(data.error || 'Failed to load notifications');
+                }
+            } catch (error) {
+                console.error('Error loading notifications:', error);
+                document.getElementById('notificationsList').innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">❌</div>
+                        <p>Error loading notifications</p>
+                        <p style="font-size: 14px; margin-top: 8px;">${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderNotifications(notifications) {
+            const container = document.getElementById('notificationsList');
+
+            if (notifications.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>No notifications yet</p>
+                        <p style="font-size: 14px; margin-top: 8px;">You're all caught up!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = notifications.map(notif => {
+                const isUnread = !notif.is_read;
+                const typeClass = notif.notification_type === 'task_assignment' ? 'type-task' :
+                                notif.notification_type === 'task_completion' ? 'type-task' :
+                                notif.notification_type === 'project_invite' ? 'type-project' : 'type-system';
+                
+                const icon = notif.notification_type === 'task_assignment' ? '📋' :
+                            notif.notification_type === 'task_completion' ? '✅' :
+                            notif.notification_type === 'project_invite' ? '🎯' : '🔔';
+
+                const timeAgo = getTimeAgo(notif.created_at);
+
+                return `
+                    <div class="notification-card ${isUnread ? 'unread' : ''}" id="notif-${notif.id}">
+                        <div class="notification-header">
+                            <div>
+                                <div class="notification-title">
+                                    ${icon} ${notif.title}
+                                    ${isUnread ? '<span style="color: #3b82f6; font-size: 14px; margin-left: 8px;">● NEW</span>' : ''}
+                                </div>
+                                <div class="notification-message">${notif.message}</div>
+                            </div>
+                        </div>
+                        <div class="notification-meta">
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <span class="notification-type ${typeClass}">
+                                    ${notif.notification_type.replace('_', ' ').toUpperCase()}
+                                </span>
+                                <span class="notification-time">${timeAgo}</span>
+                            </div>
+                            ${isUnread ? `
+                                <button class="mark-read-btn" onclick="markAsRead(${notif.id})">
+                                    Mark as Read
+                                </button>
+                            ` : `
+                                <span style="color: #10b981; font-size: 12px; font-weight: 600;">✓ Read</span>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateUnreadBadge(count) {
+            const badge = document.getElementById('unreadBadge');
+            if (count > 0) {
+                badge.textContent = `${count} Unread`;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        async function markAsRead(notificationId) {
+            try {
+                const response = await fetch(`${API_BASE}/api/notifications/${notificationId}/read`, {
+                    method: 'PUT'
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    // Update UI
+                    const card = document.getElementById(`notif-${notificationId}`);
+                    if (card) {
+                        card.classList.remove('unread');
+                        
+                        // Update the button
+                        const metaDiv = card.querySelector('.notification-meta');
+                        const button = metaDiv.querySelector('.mark-read-btn');
+                        if (button) {
+                            button.outerHTML = '<span style="color: #10b981; font-size: 12px; font-weight: 600;">✓ Read</span>';
+                        }
+
+                        // Remove NEW indicator
+                        const title = card.querySelector('.notification-title');
+                        const newIndicator = title.querySelector('span');
+                        if (newIndicator) {
+                            newIndicator.remove();
+                        }
+                    }
+
+                    // Update local data
+                    const notif = allNotifications.find(n => n.id === notificationId);
+                    if (notif) {
+                        notif.is_read = true;
+                    }
+
+                    // Update badge
+                    const unreadCount = allNotifications.filter(n => !n.is_read).length;
+                    updateUnreadBadge(unreadCount);
+
+                } else {
+                    alert('Failed to mark as read: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error marking as read:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function markAllAsRead() {
+            const unreadNotifs = allNotifications.filter(n => !n.is_read);
+            
+            if (unreadNotifs.length === 0) {
+                alert('All notifications are already read!');
+                return;
+            }
+
+            if (!confirm(`Mark ${unreadNotifs.length} notification(s) as read?`)) {
+                return;
+            }
+
+            try {
+                // Mark all as read
+                for (const notif of unreadNotifs) {
+                    await markAsRead(notif.id);
+                }
+
+                alert('✅ All notifications marked as read!');
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function filterUnread() {
+            currentFilter = 'unread';
+            const unreadNotifs = allNotifications.filter(n => !n.is_read);
+            renderNotifications(unreadNotifs);
+        }
+
+        function showAll() {
+            currentFilter = 'all';
+            renderNotifications(allNotifications);
+        }
+
+        function getTimeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            if (seconds < 60) return 'Just now';
+            if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+            if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+            if (seconds < 604800) return `${Math.floor(seconds / 86400)} days ago`;
+            
+            return date.toLocaleDateString();
+        }
+    </script>
+</body>
+</html>

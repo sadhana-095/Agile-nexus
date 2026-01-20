@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dependency Analysis - Agile Nexus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #1f2937;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-4px);
+        }
+
+        .header-card {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .dependency-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .dependency-count-large {
+            font-size: 72px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dependency-label-large {
+            font-size: 24px;
+            color: #6b7280;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 24px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dependency-item {
+            padding: 20px;
+            background: #f9fafb;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dependency-item:hover {
+            background: white;
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .dependency-item.high-risk {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .dependency-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .dependency-title {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 16px;
+        }
+
+        .risk-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-high {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .badge-medium {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge-low {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .dependency-details {
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .loading-spinner {
+            font-size: 48px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .click-hint {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            margin-left: 8px;
+        }
+
+        .dependency-item:hover .click-hint {
+            opacity: 1;
+        }
+
+        .member-section {
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .member-section:last-child {
+            border-bottom: none;
+        }
+
+        .member-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .member-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: white;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        .member-info h4 {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .member-info p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-box {
+            background: #f9fafb;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 32px;
+            cursor: pointer;
+            color: #6b7280;
+            line-height: 1;
+        }
+
+        .detail-section {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .detail-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .detail-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: white;
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .metric-value {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .formula-box {
+            background: #1f2937;
+            color: #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 12px 0;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="goBack()">
+            ← Back to Dashboard
+        </button>
+
+        <div id="loadingState" class="loading">
+            <div class="loading-spinner">⏳</div>
+            <p>Loading dependency analysis...</p>
+        </div>
+
+        <div id="contentState" style="display: none;">
+            <div class="header-card">
+                <div class="dependency-icon">🔗</div>
+                <div class="dependency-count-large" id="dependencyCountLarge">--</div>
+                <div class="dependency-label-large">Critical Dependencies</div>
+                <p id="dependencyDescription" style="color: #6b7280; font-size: 18px;">
+                    Loading dependency data...
+                </p>
+            </div>
+
+            <div class="card">
+                <h3 class="card-title">👥 Dependencies by Team Member</h3>
+                <p style="color: #6b7280; margin-bottom: 24px;">
+                    Click on any dependency to see detailed analysis
+                </p>
+                <div id="memberDependenciesList"></div>
+            </div>
+        </div>
+    
+        <!-- Modal for dependency details -->
+        <div class="modal" id="dependencyModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title" id="modalTitle">Dependency Details</h2>
+                    <button class="close-btn" onclick="closeModal()">×</button>
+                </div>
+                <div id="modalContent"></div>
+            </div>
+        </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000';
+
+        window.onload = async function() {
+            const user = JSON.parse(sessionStorage.getItem('user') || '{}');
+            
+            if (!user.username) {
+                window.location.href = '/';
+                return;
+            }
+
+            await loadDependencyData();
+        };
+
+        function goBack() {
+            window.location.href = '/manager-dashboard';
+        }
+
+        async function loadDependencyData() {
+            try {
+                console.log('🔗 Loading dependency data...');
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const projectId = urlParams.get('project_id') || 
+                                 JSON.parse(sessionStorage.getItem('currentProject') || '{}').id;
+                
+                if (!projectId) {
+                    throw new Error('No project selected');
+                }
+
+                const response = await fetch(`${API_BASE}/analyze-dependencies`);
+                const data = await response.json();
+
+                console.log('Dependency data:', data);
+
+                if (data.status === 'success') {
+                    const dependencies = data.dependency_predictions?.predictions || [];
+                    
+                    // Update count
+                    document.getElementById('dependencyCountLarge').textContent = dependencies.length;
+                    
+                    // Update description
+                    const highRiskCount = dependencies.filter(d => d.predicted_risk_probability > 0.7).length;
+                    document.getElementById('dependencyDescription').textContent = 
+                        `${highRiskCount} high-risk dependencies need immediate attention`;
+
+                    // Render dependencies
+                    renderDependencies(dependencies);
+
+                    // Show content
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('contentState').style.display = 'block';
+                } else {
+                    throw new Error(data.error || 'Failed to load dependencies');
+                }
+
+            } catch (error) {
+                console.error('❌ Error loading dependencies:', error);
+                document.getElementById('loadingState').innerHTML = `
+                    <div class="loading-spinner">❌</div>
+                    <p>Error loading dependency data: ${error.message}</p>
+                    <button class="back-button" onclick="goBack()" style="margin-top: 20px;">
+                        Back to Dashboard
+                    </button>
+                `;
+            }
+        }
+
+        function renderDependencies(dependencies) {
+            const container = document.getElementById('memberDependenciesList');
+    
+            // ✅ Add null check
+            if (!container) {
+                console.error('❌ Element "memberDependenciesList" not found in DOM');
+                return;
+            }
+            if (dependencies.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #6b7280;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+                        <p>No dependencies found</p>
+                    </div>
+                `;
+                return;
+            }
+            // Group dependencies by member
+            const memberDeps = {};
+    
+            dependencies.forEach(dep => {
+                // Extract member names from source_story and dependent_story
+                const sourceMatch = dep.source_story?.match(/^([^\/]+)/);
+                const dependentMatch = dep.dependent_story?.match(/^([^\/]+)/);
+        
+                const sourceMember = sourceMatch ? sourceMatch[1] : 'Unknown';
+                const dependentMember = dependentMatch ? dependentMatch[1] : 'Unknown';
+        
+                // Add to source member (they're blocking)
+                if (!memberDeps[sourceMember]) {
+                    memberDeps[sourceMember] = { blocking: [], blocked: [] };
+                }
+                memberDeps[sourceMember].blocking.push(dep);
+        
+                // Add to dependent member (they're being blocked)
+                if (!memberDeps[dependentMember]) {
+                    memberDeps[dependentMember] = { blocking: [], blocked: [] };
+                }
+                memberDeps[dependentMember].blocked.push(dep);
+            });
+
+            // Render each member's section
+            let html = '';
+    
+            Object.keys(memberDeps).sort().forEach(member => {
+                const data = memberDeps[member];
+                const totalDeps = data.blocking.length + data.blocked.length;
+                const highRiskCount = [...data.blocking, ...data.blocked]
+                    .filter(d => d.predicted_risk_probability > 0.7).length;
+        
+                const initial = member.charAt(0).toUpperCase();
+                const displayName = member.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        
+                html += `
+                    <div class="member-section">
+                        <div class="member-header">
+                            <div class="member-avatar">${initial}</div>
+                            <div class="member-info">
+                                <h4>${displayName}</h4>
+                                <p>@${member}</p>
+                            </div>
+                        </div>
+                
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <div class="stat-value">${totalDeps}</div>
+                                <div class="stat-label">Total Dependencies</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" style="color: #ef4444;">${data.blocking.length}</div>
+                                <div class="stat-label">Blocking Others</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value" style="color: #f59e0b;">${data.blocked.length}</div>
+                                <div class="stat-label">Being Blocked</div>
+                            </div>
+                        </div>
+                
+                        ${renderMemberDependencies(data.blocking, 'Blocking Others', member)}
+                        ${renderMemberDependencies(data.blocked, 'Being Blocked By', member)}
+                    </div>
+                `;
+            });
+
+            document.getElementById('memberDependenciesList').innerHTML = html;
+        }
+
+        function renderMemberDependencies(deps, title, memberName) {
+            if (deps.length === 0) return '';
+    
+            const uniqueDeps = Array.from(new Set(deps.map(d => JSON.stringify(d))))
+                .map(d => JSON.parse(d));
+    
+            let html = `
+                <h4 style="color: #1f2937; margin-bottom: 12px; font-size: 16px;">
+                    ${title === 'Blocking Others' ? '🚫' : '⏳'} ${title} (${uniqueDeps.length})
+                </h4>
+            `;
+    
+            uniqueDeps.forEach(dep => {
+                const riskProb = dep.predicted_risk_probability || 0;
+                const riskLevel = riskProb > 0.7 ? 'high' : riskProb > 0.4 ? 'medium' : 'low';
+        
+                const sourceTask = dep.source_task_name || getReadableTaskName(dep.source_story);
+                const dependentTask = dep.dependent_task_name || getReadableTaskName(dep.dependent_story);
+        
+                const depJson = JSON.stringify(dep).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+                html += `
+                    <div class="dependency-item ${riskLevel === 'high' ? 'high-risk' : ''}" 
+                        onclick='showDependencyDetails(${depJson})'>
+                        <div class="dependency-header">
+                            <div class="dependency-title">
+                                ${sourceTask} → ${dependentTask}
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <span class="risk-badge badge-${riskLevel}">
+                                    ${riskLevel.toUpperCase()} RISK
+                                </span>
+                                <span class="click-hint">👉 Click for details</span>
+                            </div>
+                        </div>
+                        <div class="dependency-details">
+                            Risk: ${Math.round(riskProb * 100)}% | 
+                            Cascade Impact: ${dep.predicted_cascade_impact || 0} tasks
+                        </div>
+                    </div>
+                `;
+            });
+    
+            return html;
+        }
+
+        function showDependencyDetails(dep) {
+            const riskLevel = dep.predicted_risk_probability > 0.7 ? 'Critical' :
+                            dep.predicted_risk_probability > 0.4 ? 'High' : 'Medium';
+    
+            const riskColor = dep.predicted_risk_probability > 0.7 ? '#ef4444' :
+                     dep.predicted_risk_probability > 0.4 ? '#f59e0b' : '#3b82f6';
+    
+            const sourceTask = dep.source_task_name || getReadableTaskName(dep.source_story);
+            const dependentTask = dep.dependent_task_name || getReadableTaskName(dep.dependent_story);
+    
+            const html = `
+                <div class="detail-section">
+                    <h3>🔗 Dependency Analysis</h3>
+                    <div style="background: white; padding: 20px; border-radius: 12px; border-left: 6px solid ${riskColor};">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <h2 style="color: #1f2937; margin-bottom: 8px; font-size: 20px;">${sourceTask}</h2>
+                                <div style="color: ${riskColor}; font-weight: 600; margin: 8px 0;">↓ blocks ↓</div>
+                                <h2 style="color: #1f2937; font-size: 20px;">${dependentTask}</h2>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 48px; font-weight: 700; color: ${riskColor};">
+                                    ${Math.round(dep.predicted_risk_probability * 100)}%
+                                </div>
+                                <div style="font-size: 14px; color: #6b7280;">Risk Score</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>📊 Risk Breakdown</h3>
+                    <div class="detail-metric">
+                        <span class="metric-label">Risk Level</span>
+                        <span class="metric-value" style="color: ${riskColor};">${riskLevel}</span>
+                    </div>
+                    <div class="detail-metric">
+                        <span class="metric-label">Cascade Impact</span>
+                        <span class="metric-value">${dep.predicted_cascade_impact || 0} tasks</span>
+                    </div>
+                    <div class="detail-metric">
+                        <span class="metric-label">Dependency Type</span>
+                        <span class="metric-value">${dep.dependency_type || 'blocks'}</span>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>🎯 What This Means</h3>
+                    <div style="background: ${dep.predicted_risk_probability > 0.7 ? '#fef2f2' : '#fffbeb'}; padding: 16px; border-radius: 8px; border-left: 4px solid ${riskColor};">
+                        <p style="color: #1f2937; line-height: 1.6;">
+                            ${dep.predicted_risk_probability > 0.7 ? 
+                                `🚨 <strong>Critical:</strong> ${sourceTask} is blocking ${dependentTask} with a ${Math.round(dep.predicted_risk_probability * 100)}% probability of causing delays. This could cascade to ${dep.predicted_cascade_impact} other tasks.` :
+                                `⚡ <strong>${sourceTask}</strong> needs completion before <strong>${dependentTask}</strong> can proceed. Monitor closely to prevent delays.`
+                            }
+                        </p>
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>💡 Manager Action Items</h3>
+                    <div style="background: #eff6ff; padding: 16px; border-radius: 8px;">
+                        ${dep.predicted_risk_probability > 0.7 ? `
+                            <ul style="margin: 0; padding-left: 20px; color: #1f2937; line-height: 1.8;">
+                                <li><strong>Immediate:</strong> Schedule daily check-ins on ${sourceTask}</li>
+                                <li><strong>Resource:</strong> Consider adding team members to ${sourceTask}</li>
+                                <li><strong>Mitigation:</strong> Create parallel work paths if possible</li>
+                                <li><strong>Timeline:</strong> Add buffer time for potential delays</li>
+                            </ul>
+                        ` : `
+                            <ul style="margin: 0; padding-left: 20px; color: #1f2937; line-height: 1.8;">
+                                <li><strong>Monitor:</strong> Track ${sourceTask} progress regularly</li>
+                                <li><strong>Communicate:</strong> Keep ${dependentTask} owner informed</li>
+                                <li><strong>Plan:</strong> Have contingency ready if delays occur</li>
+                            </ul>
+                        `}
+                    </div>
+                </div>
+
+                <div class="detail-section">
+                    <h3>🤖 AI Analysis Method</h3>
+                    <div class="formula-box">
+        Risk Score = 0.40 × Direct_Block_Probability
+                    + 0.30 × Cascade_Impact_Factor
+                    + 0.20 × (1 / Path_Length)
+                    + 0.10 × Team_Coordination_Score
+                    </div>
+                </div>
+            `;
+    
+            document.getElementById('modalTitle').textContent = '🔗 Dependency Details';
+            document.getElementById('modalContent').innerHTML = html;
+            document.getElementById('dependencyModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('dependencyModal').classList.remove('active');
+        }
+
+        function getReadableTaskName(storyId) {
+            if (!storyId) return 'Unknown Task';
+            
+            let name = storyId.split('/').pop().split('#')[0];
+            return name.replace(/[-_]/g, ' ')
+                .split(' ')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        }
+    </script>
+</body>
+</html>
